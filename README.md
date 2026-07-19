@@ -101,7 +101,7 @@ uv run .\main.py --din A5 --booklet-cut .\brochure.pdf
 Generate the visual examples via command line:
 
 ```powershell
-c:/Users/boasd/Coding/scale-pdf/.venv/Scripts/python.exe .\scripts\generate_mode_visuals.py
+uv run .\scripts\generate_mode_visuals.py
 ```
 
 Images are written to the examples folder:

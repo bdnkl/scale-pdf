@@ -80,7 +80,7 @@ def visual_normal_scaling():
 
 def visual_two_up():
     doc = fitz.open()
-    page = doc.new_page(width=1200, height=760)
+    page = doc.new_page(width=1200, height=820)
 
     draw_header(
         page,
@@ -95,43 +95,39 @@ def visual_two_up():
     labeled_box(page, src1, "P1", fill=(0.87, 0.93, 1.0), fs=28)
     labeled_box(page, src2, "P2", fill=(0.87, 0.93, 1.0), fs=28)
 
-    page.draw_rect(out, color=(0.2, 0.2, 0.2), fill=(0.95, 0.98, 0.9), width=1.5)
+    # Pale green = full half area (this is what stays visible as the margin).
+    page.draw_rect(out, color=(0.2, 0.2, 0.2), fill=(0.85, 0.95, 0.85), width=1.5)
     split_x = (out.x0 + out.x1) / 2
     page.draw_line(fitz.Point(split_x, out.y0), fitz.Point(split_x, out.y1), color=(0.5, 0.5, 0.5), width=1)
 
-    # Simulate optional --2-margin-mm by shrinking printable area.
+    # Darker green = actual printable area after applying --2-margin-mm.
     margin = 18
     left_half = fitz.Rect(out.x0 + margin, out.y0 + margin, split_x - margin, out.y1 - margin)
     right_half = fitz.Rect(split_x + margin, out.y0 + margin, out.x1 - margin, out.y1 - margin)
 
-    # Reference border (full half area without margin).
-    page.draw_rect(fitz.Rect(out.x0, out.y0, split_x, out.y1), color=(0.7, 0.7, 0.7), width=0.8)
-    page.draw_rect(fitz.Rect(split_x, out.y0, out.x1, out.y1), color=(0.7, 0.7, 0.7), width=0.8)
-
-    labeled_box(page, left_half, "P1", fill=(0.75, 0.9, 0.75), fs=24)
-    labeled_box(page, right_half, "P2", fill=(0.75, 0.9, 0.75), fs=24)
+    labeled_box(page, left_half, "P1", fill=(0.45, 0.75, 0.45), fs=24)
+    labeled_box(page, right_half, "P2", fill=(0.45, 0.75, 0.45), fs=24)
 
     draw_arrow(page, 510, 430, 630, 430, "place both")
 
-    # Clear margin callout outside the content area.
-    callout = fitz.Rect(820, 120, 1170, 180)
+    # Callout sits below the sheet and points straight up into the pale green
+    # margin strip at the bottom of the right half (well away from the P2 label).
+    gap_target = fitz.Point(split_x + (out.x1 - split_x) / 2, out.y1 - margin / 2)
+    callout = fitz.Rect(gap_target.x - 140, 715, gap_target.x + 140, 762)
     page.draw_rect(callout, color=(0.35, 0.35, 0.35), fill=(1.0, 0.98, 0.86), width=1.2)
     page.insert_textbox(
         callout,
-        "--2-margin-mm\nadds inner white space",
-        fontsize=16,
+        "--2-margin-mm\npale green = margin",
+        fontsize=14,
         fontname="helv",
         align=1,
         color=(0.15, 0.15, 0.15),
     )
-    # Arrow points to the actual gap between gray border and green printable area.
-    page.draw_line(fitz.Point(915, 180), fitz.Point(975, 230), color=(0.35, 0.35, 0.35), width=2.2)
-    page.draw_line(fitz.Point(975, 230), fitz.Point(960, 227), color=(0.35, 0.35, 0.35), width=2.2)
-    page.draw_line(fitz.Point(975, 230), fitz.Point(968, 216), color=(0.35, 0.35, 0.35), width=2.2)
+    draw_arrow(page, gap_target.x, 713, gap_target.x, gap_target.y + 4)
 
     page.insert_textbox(
-        fitz.Rect(640, 700, 1140, 740),
-        "Output: A(n-1) landscape. Gray border = full half area; green area = with optional margin.",
+        fitz.Rect(640, 775, 1140, 810),
+        "Dark green = printable area; pale green = margin (0 by default).",
         fontsize=13,
         fontname="helv",
         align=1,
